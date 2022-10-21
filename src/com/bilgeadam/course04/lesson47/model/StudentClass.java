@@ -4,12 +4,14 @@ import java.util.List;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 @Getter
 @ToString
 @Builder
 public class StudentClass {
+	private long oid;
 	private long nationalId;
 	private String firstName;
 	private String lastName;
@@ -17,6 +19,7 @@ public class StudentClass {
 	private String street;
 	private String country;
 	private int countryCode;
+	@Setter
 	private List<Telephone> numbers;
 	private int courseId;
 	private String courseName;

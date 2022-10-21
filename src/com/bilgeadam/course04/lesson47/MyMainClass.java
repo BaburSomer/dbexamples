@@ -50,16 +50,19 @@ public class MyMainClass {
 				.courseId(rs.getInt(8))
 				.attandenceYear(rs.getInt(9))
 				.grade(rs.getDouble(10))
-				.street(rs.getString(11)).build();
+				.street(rs.getString(11))
+				.oid(rs.getLong(12)).build();
 				studentClasses.add(student);
 			}
 			
 			for (StudentClass studentClass : studentClasses) {
+				List<Telephone> numbers = new ArrayList<>();
 				rs    = stmt.executeQuery("SELECT \"number\" AS telNo, type FROM telephone_numbers WHERE national_id=" + studentClass.getNationalId());
 				while (rs.next()) {
 					Telephone tel = new Telephone(rs.getLong("telNo"), rs.getString("type"));  // <=======
-					System.out.println(tel);
+					numbers.add(tel);
 				}
+				studentClass.setNumbers(numbers);
 			}
 
 		} catch (SQLException e) {
