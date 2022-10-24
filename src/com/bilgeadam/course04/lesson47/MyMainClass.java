@@ -7,11 +7,12 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.bilgeadam.course04.lesson47.model.Student;
 import com.bilgeadam.course04.lesson47.model.StudentClass;
 import com.bilgeadam.course04.lesson47.model.Telephone;
 
 public class MyMainClass {
-	private List<StudentClass> studentClasses = new ArrayList<>();
+	private List<Student> students = new ArrayList<>();
 	private Connection connection = DatabaseConnection.getInstance().getConnection();
 	
 	public static void main(String... args) {
@@ -28,43 +29,52 @@ public class MyMainClass {
 	}
 
 	private void listStudentClasses() {
-		for (StudentClass studentClass : studentClasses) {
-			System.out.println(studentClass);
+		for (Student student : students) {
+			System.out.println(student);
 		}
 	}
 
 	private void retrieveStudentClasses() {
 		try {
 			Statement stmt = connection.createStatement();
-			ResultSet rs    = stmt.executeQuery("SELECT * FROM student_classes");
-			
+			ResultSet rs    = stmt.executeQuery("SELECT * FROM student_information");
+			String actualFullName = "";
+			long actualTelephoneNumber = Long.MAX_VALUE;
+			Student stdnt = null;
 			while (rs.next()) {
-				StudentClass student = StudentClass.builder()
-				.nationalId(rs.getLong(1))
-				.firstName(rs.getString(2))
-				.lastName(rs.getString(3))
-				.city(rs.getString(4))
-				.country(rs.getString(5))
-				.countryCode(rs.getInt(6))
-				.courseName(rs.getString(7))
-				.courseId(rs.getInt(8))
-				.attandenceYear(rs.getInt(9))
-				.grade(rs.getDouble(10))
-				.street(rs.getString(11))
-				.oid(rs.getLong(12)).build();
-				studentClasses.add(student);
+				String firstName=rs.getString("first_name");
+				String lastName=rs.getString("last_name");
+				String middleName=rs.getString("middle_name");
+				String fullName = firstName + " " + middleName + " " + lastName;
+				if (actualFullName.equals(fullName)) {
+					long telephoneNumber = rs.getLong("telephone");
+					if (telephoneNumber == actualTelephoneNumber) {
+						
+					}
+					else {
+						Telephone telephone = new Telephone(telephoneNumber, rs.getString("telephone_type"));
+						actualTelephoneNumber = telephoneNumber;
+						stdnt.addTelephone(telephone);
+					}
+				}
+				else {
+					actualFullName = fullName;
+					actualTelephoneNumber = Long.MAX_VALUE;
+					stdnt = new Student(firstName, middleName, lastName, rs.getLong("registration_number"), rs.getLong("national_id"));
+					students.add(stdnt);
+				}
+				
+//				StudentClass student = StudentClass.builder()
+//				.city(rs.getString(4))
+//				.country(rs.getString(5))
+//				.countryCode(rs.getInt(6))
+//				.courseName(rs.getString(7))
+//				.courseId(rs.getInt(8))
+//				.attandenceYear(rs.getInt(9))
+//				.grade(rs.getDouble(10))
+//				.street(rs.getString(11))
 			}
 			
-			for (StudentClass studentClass : studentClasses) {
-				List<Telephone> numbers = new ArrayList<>();
-				rs    = stmt.executeQuery("SELECT \"number\" AS telNo, type FROM telephone_numbers WHERE national_id=" + studentClass.getNationalId());
-				while (rs.next()) {
-					Telephone tel = new Telephone(rs.getLong("telNo"), rs.getString("type"));  // <=======
-					numbers.add(tel);
-				}
-				studentClass.setNumbers(numbers);
-			}
-
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
